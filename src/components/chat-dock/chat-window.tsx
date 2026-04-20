@@ -28,7 +28,9 @@ import { cn } from "@/lib/utils";
 import { useChatDock } from "./chat-dock-context";
 import type { Message } from "@/types";
 
-const POLL_INTERVAL = 8_000;
+const ACTIVE_POLL = 8_000;
+const IDLE_POLL = 30_000;
+const IDLE_AFTER = 2 * 60_000;
 
 interface OtherUser {
   id: string;
@@ -89,6 +91,8 @@ export function ChatWindow({ conversationId, index }: ChatWindowProps) {
   const [isSending, setIsSending] = useState(false);
   const [content, setContent] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const lastActivityRef = useRef<number>(Date.now());
+  const lastMessageIdRef = useRef<string | null>(null);
   const indexLabel = `CH-${String(index + 1).padStart(2, "0")}`;
 
   const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
@@ -100,7 +104,13 @@ export function ChatWindow({ conversationId, index }: ChatWindowProps) {
       const data = await api.get<{ messages: Message[]; conversation?: ConversationMeta }>(
         `/api/conversations/${conversationId}/messages`
       );
-      setMessages([...data.messages].reverse());
+      const ordered = [...data.messages].reverse();
+      const newestId = ordered[ordered.length - 1]?.id ?? null;
+      if (newestId !== lastMessageIdRef.current) {
+        lastMessageIdRef.current = newestId;
+        lastActivityRef.current = Date.now();
+      }
+      setMessages(ordered);
       if (data.conversation) setMeta(data.conversation);
       await api.post(`/api/conversations/${conversationId}/read`).catch(() => {});
     } catch {
@@ -137,8 +147,32 @@ export function ChatWindow({ conversationId, index }: ChatWindowProps) {
   }, [messages.length, scrollToBottom]);
 
   useEffect(() => {
-    const id = setInterval(() => void fetchMessages(), POLL_INTERVAL);
-    return () => clearInterval(id);
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let cancelled = false;
+
+    function schedule() {
+      if (cancelled || document.hidden) return;
+      const idle = Date.now() - lastActivityRef.current > IDLE_AFTER;
+      timeoutId = setTimeout(tick, idle ? IDLE_POLL : ACTIVE_POLL);
+    }
+
+    async function tick() {
+      await fetchMessages();
+      schedule();
+    }
+
+    function handleVisibility() {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (!document.hidden) void tick();
+    }
+
+    schedule();
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      cancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [fetchMessages]);
 
   async function handleSend(e: React.FormEvent) {
@@ -153,6 +187,8 @@ export function ChatWindow({ conversationId, index }: ChatWindowProps) {
         { content: text }
       );
       setMessages((prev) => [...prev, data.message]);
+      lastMessageIdRef.current = data.message.id;
+      lastActivityRef.current = Date.now();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to send");
       setContent(text);

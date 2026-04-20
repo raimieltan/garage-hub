@@ -86,6 +86,11 @@ function commit(next: OpenChat[]) {
   listeners.forEach((cb) => cb());
 }
 
+export function clearOpenChats() {
+  if (snapshot.length === 0) return;
+  commit(EMPTY);
+}
+
 export function ChatDockProvider({ children }: { children: ReactNode }) {
   const openChats = useSyncExternalStore(
     subscribe,

@@ -1,13 +1,20 @@
 "use client";
 
-import { useChatDock } from "./chat-dock-context";
+import { useEffect } from "react";
+import { useAuth } from "@/lib/auth-context";
+import { clearOpenChats, useChatDock } from "./chat-dock-context";
 import { ChatWindow } from "./chat-window";
 import { ChatHead } from "./chat-head";
 
 export function ChatDock() {
+  const { isAuthenticated, isLoading } = useAuth();
   const { openChats } = useChatDock();
 
-  if (openChats.length === 0) return null;
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) clearOpenChats();
+  }, [isAuthenticated, isLoading]);
+
+  if (!isAuthenticated || openChats.length === 0) return null;
 
   const expanded = openChats.filter((c) => !c.minimized);
   const minimized = openChats.filter((c) => c.minimized);

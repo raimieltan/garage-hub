@@ -132,8 +132,30 @@ export function ChatPopover() {
     if (!isOpen) return;
     setIsLoading(true);
     void fetchConversations();
-    const id = setInterval(() => void fetchConversations(), POLL_INTERVAL);
-    return () => clearInterval(id);
+
+    let timeoutId: ReturnType<typeof setTimeout> | null = null;
+    let cancelled = false;
+
+    function schedule() {
+      if (cancelled || document.hidden) return;
+      timeoutId = setTimeout(tick, POLL_INTERVAL);
+    }
+    async function tick() {
+      await fetchConversations();
+      schedule();
+    }
+    function handleVisibility() {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (!document.hidden) void tick();
+    }
+
+    schedule();
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      cancelled = true;
+      if (timeoutId) clearTimeout(timeoutId);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [isOpen, fetchConversations]);
 
   useEffect(() => {
