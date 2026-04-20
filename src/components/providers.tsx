@@ -2,6 +2,7 @@
 
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/lib/auth-context";
+import { ChatDockProvider } from "@/components/chat-dock/chat-dock-context";
 import type { ReactNode } from "react";
 
 export function Providers({ children }: { children: ReactNode }) {
@@ -11,7 +12,9 @@ export function Providers({ children }: { children: ReactNode }) {
       defaultTheme="dark"
       disableTransitionOnChange
     >
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider>
+        <ChatDockProvider>{children}</ChatDockProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

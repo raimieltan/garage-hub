@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Navbar } from "@/components/nav/navbar";
 import { MobileNav } from "@/components/nav/mobile-nav";
 import { Toaster } from "@/components/ui/sonner";
+import { ChatDock } from "@/components/chat-dock/chat-dock";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,6 +15,13 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -31,13 +39,14 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${instrumentSerif.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Providers>
           <Navbar />
           <main className="flex-1 pb-16 md:pb-0">{children}</main>
           <MobileNav />
+          <ChatDock />
           <Toaster />
         </Providers>
       </body>

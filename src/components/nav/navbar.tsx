@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Flag, Home, CalendarDays, Car, LogOut, User, Search, MessageCircle } from "lucide-react";
+import { Flag, Home, CalendarDays, Car, LogOut, User, Search } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { NotificationBell } from "@/components/nav/notification-bell";
+import { ChatPopover } from "@/components/nav/chat-popover";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const navLinks = [
@@ -56,7 +57,7 @@ export function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
+      <div className="mx-auto flex h-14 max-w-[1320px] items-center gap-4 px-3 sm:px-5 xl:px-8">
         {/* Logo */}
         <Link
           href={isAuthenticated ? "/feed" : "/"}
@@ -89,18 +90,7 @@ export function Navbar() {
           <ThemeToggle />
           {isAuthenticated && user ? (
             <>
-              <Link
-                href="/messages"
-                aria-label="Messages"
-                className={cn(
-                  "flex items-center rounded-lg p-1.5 text-sm font-medium transition-colors",
-                  pathname === "/messages" || pathname.startsWith("/messages/")
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                )}
-              >
-                <MessageCircle className="size-5" />
-              </Link>
+              <ChatPopover />
               <NotificationBell />
             </>
           ) : null}

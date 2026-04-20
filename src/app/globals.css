@@ -10,6 +10,7 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
+  --font-display: var(--font-display);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -147,6 +148,83 @@
 }
 
 @layer utilities {
+  /* hide scrollbar but keep scroll functional — used inside sticky rails */
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* editorial serif — used for rail section titles */
+  .font-display {
+    font-family: var(--font-display), ui-serif, Georgia, serif;
+  }
+
+  /* pit-lane section index — dashboard/telemetry rhythm */
+  .pit-index {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--muted-foreground);
+  }
+  .pit-index .pit-index__num {
+    color: var(--primary);
+    font-weight: 500;
+  }
+  .pit-index .pit-index__rule {
+    flex: 1;
+    height: 1px;
+    background-image: linear-gradient(
+      to right,
+      var(--border) 0,
+      var(--border) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+    background-size: 8px 1px;
+  }
+
+  /* amber signal chip — used for active nav and small status tokens */
+  .signal-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 2px 6px;
+    border-radius: 2px;
+    background: color-mix(in oklch, var(--accent) 14%, transparent);
+    color: var(--accent);
+    font-family: var(--font-geist-mono), ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .signal-chip::before {
+    content: "";
+    width: 4px;
+    height: 4px;
+    border-radius: 9999px;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+  }
+
+  /* checker — subtle racing footer strip */
+  .checker-strip {
+    height: 6px;
+    background-image:
+      linear-gradient(45deg, var(--border) 25%, transparent 25%),
+      linear-gradient(-45deg, var(--border) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--border) 75%),
+      linear-gradient(-45deg, transparent 75%, var(--border) 75%);
+    background-size: 6px 6px;
+    background-position: 0 0, 0 3px, 3px -3px, -3px 0;
+    opacity: 0.6;
+  }
+
   .racing-gradient {
     background: linear-gradient(135deg, oklch(0.65 0.25 25), oklch(0.70 0.20 55));
   }
